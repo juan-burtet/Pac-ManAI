@@ -6,8 +6,7 @@
   - A*
   - Têmpera Simulada
   - Subida de Encosta
-  
-### Busca de Custo Uniforme
+  - Busca de Custo Uniforme
 ### Criar novos labirintos para teste (pequenos, médios e grandes)
 ### Apresentar relatório sobre os resultados
 ### Entrada:
