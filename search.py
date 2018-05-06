@@ -268,59 +268,75 @@ def hillClimbing(problem):
 
 # Têmpera Simulada
 def simmulatedAnnealing(problem):
+
     """
-    #Temperatura com valor elevado
+    function SIMULATED-ANNEALING(problem, schedule) returns a solution state
+        inputs: problem, a problem
+                schedule, a mapping from time to "temperature"
+
+        current <- MAKE-NODE(problem.INITIAL-STATE)
+        for t = 1 to INFINITE do
+            T <- schedule(t)
+            if T = 0 then return current
+            next <- a randomly selected sucessor of current
+            (DELTA)E <- next.VALUE - current.VALUE
+            if (DELTA)E > 0 then current <- next
+            else current <- next only with probability e^(DELTA)E/T
+    """
+
+    """
+    Temperatura com valor elevado
     T = 1000
-    #Solução candidata inicial qualquer
+    Solução candidata inicial qualquer
     S = problem.getStartState()
-    #Vetor de acoes
+    Vetor de acoes
     acoes = []
-    #Melhor recebe S
+    Melhor recebe S
     Melhor = S
 
-    #Repita até Melhor = solucaoIdeal OU T < 0
+    Repita até Melhor = solucaoIdeal OU T < 0
     while
-        #R <- gerarVizinho(S)
-        #Qualidade(R) > Qualidade(S) OU Aleatorio() < P(R,S,T)
-        #P(R.S.T) = EXP(Qualidade(R)-Qualidade(S))/T
-            #S <- #R
-        #T <- novaTemperatura(T)
-        #Se Qualidade(S) > Qualidade(Melhor)
-            #Melhor <- S
-    #Return Melhor
-    #Retornar vetor de acoes(caminho percorrido)
+        R <- gerarVizinho(S)
+        Qualidade(R) > Qualidade(S) OU Aleatorio() < P(R,S,T)
+        P(R.S.T) = EXP(Qualidade(R)-Qualidade(S))/T
+            S <- #R
+        T <- novaTemperatura(T)
+        Se Qualidade(S) > Qualidade(Melhor)
+            Melhor <- S
+    Return Melhor
+    Retornar vetor de acoes(caminho percorrido)
 
-    #-------------------------------------------------------------------------
+    -------------------------------------------------------------------------
 
-    #S = S0
-    #T0 = TempInicial()
-    #T = T0
-    #j = 1
-    #/*Loop principal – Verifica se foram atendidas as condições de termino do algoritmo*/
-    #Repita
-    #    i = 1
-    #    nSucesso = 0
-    #    /*Loop Interno – Realização de perturbação em uma iteração*/
-    #    Repita
-    #        Si = Perturba(S)
-    #        ∆Fi = f(Si) – f(S)
-    #        /*Teste de aceitação de uma nova solução*/
-    #        Se (∆fi ≤ 0) ou (exp(-∆fi/T) > Randomiza()) então
-    #        S= Si
-    #        nSucesso = nSucesso + 1
-    #        Fim-se
-    #        i = i + 1
-    #    Até (nSucesso ≥ L) ou (i > P)
-    #    /*Actualização da Temperatura*/
-    #    T = α.T
-    #    /*Actualização do Contador de iterações*/
-    #    j = j + 1
-    #Até (nSucesso = 0) ou (j > M)
-    #/*Saída do Algoritmo*/
-    Imprima(S)"""
+    S = S0
+    T0 = TempInicial()
+    T = T0
+    j = 1
+    /*Loop principal – Verifica se foram atendidas as condições de termino do algoritmo*/
+    Repita
+        i = 1
+        nSucesso = 0
+        /*Loop Interno – Realização de perturbação em uma iteração*/
+        Repita
+            Si = Perturba(S)
+            ∆Fi = f(Si) – f(S)
+            /*Teste de aceitação de uma nova solução*/
+            Se (∆fi ≤ 0) ou (exp(-∆fi/T) > Randomiza()) então
+            S= Si
+            nSucesso = nSucesso + 1
+            Fim-se
+            i = i + 1
+        Até (nSucesso ≥ L) ou (i > P)
+        /*Actualização da Temperatura*/
+        T = α.T
+        /*Actualização do Contador de iterações*/
+        j = j + 1
+    Até (nSucesso = 0) ou (j > M)
+    /*Saída do Algoritmo*/
+    Imprima(S)
+    """
 
-
-# Distância entre
+# Distância entre 2 pontos
 def distancia2pts(pos1, pos2):
     xy1 = pos1
     xy2 = pos2
@@ -335,3 +351,4 @@ dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
 hc = hillClimbing
+sa = simmulatedAnnealing
