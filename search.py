@@ -20,6 +20,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
+from random import randrange
 
 class SearchProblem:
     """
@@ -194,7 +195,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
 # Subida de encosta
 def hillClimbing(problem, heuristic=nullHeuristic):
-
     # recebe o Estado inicial
     atual = problem.getStartState()
     # Inicia o caminho em vazio
@@ -202,12 +202,9 @@ def hillClimbing(problem, heuristic=nullHeuristic):
 
     # Loop infinito
     while True:
-
         # Recebe os sucessores do Nodo atual
         sucessores = problem.getSuccessors(atual)
         listaSucessores = list(sucessores)
-
-        # (successor, action, stepCost)
         # Inicia vizinho com o caminho
         vizinho = listaSucessores[0]
 
@@ -226,23 +223,40 @@ def hillClimbing(problem, heuristic=nullHeuristic):
         atual = vizinho[0]
 
 # Têmpera Simulada
-def simmulatedAnnealing(problem):
+def simmulatedAnnealing(problem, heuristic=nullHeuristic):
 
-    """
-    function SIMULATED-ANNEALING(problem, schedule) returns a solution state
-        inputs: problem, a problem
-                schedule, a mapping from time to "temperature"
+    # Inicializa a fila Prioritária
+    fila = util.PriorityQueue()
+    # Nós visitados
+    expandidos = set()
+    # Nó inicial da fila
+    fila.push((problem.getStartState(), [], 0), heuristic(problem.getStartState(), problem))
 
-        current <- MAKE-NODE(problem.INITIAL-STATE)
-        for t = 1 to INFINITE do
-            T <- schedule(t)
-            if T = 0 then return current
-            next <- a randomly selected sucessor of current
-            (DELTA)E <- next.VALUE - current.VALUE
-            if (DELTA)E > 0 then current <- next
-            else current <- next only with probability e^(DELTA)E/T
-    """
-    #---------------------------------------------------------------------------
+    # Loop Infinito
+    while not fila.isEmpty():
+        # Retira da Fila o que tiver a menor distância euclidiana entre o nó atual e objetivo
+        nodoAtual, movimentos, custoAtual = fila.pop()
+        # Se o nó retirado já foi aberto, retira o próximo da fila
+        if nodoAtual in expandidos:
+            continue
+        # Se o nó retirado é o objetivo, retorna os movimentos até ele
+        if problem.isGoalState(nodoAtual):
+            return movimentos
+        # Adiciona aos nós já visitados
+        expandidos.add(nodoAtual)
+
+        # Percorre pelos vizinhos do nó
+        for nodo, movimento, custo in problem.getSuccessors(nodoAtual):
+            # Se o vizinho já foi visitado, parte pro próximo
+            if nodo in expandidos:
+                continue
+            # Calcula a heuristica do nó
+            h = heuristic(nodo, problem)
+            # Adiciona o nó na Fila prioritária, passando apenas a heuristica
+            fila.push((nodo,movimentos + [movimento], custoAtual + custo), h)
+    # Não foi encontrado o objetivo, retorna o "melhor caminho"
+    return movimentos
+
 
 # Abbreviations
 bfs = breadthFirstSearch

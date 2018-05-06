@@ -371,6 +371,7 @@ class AStarCornersAgent(SearchAgent):
         self.searchFunction = lambda prob: search.aStarSearch(prob, cornersHeuristic)
         self.searchType = CornersProblem
 
+
 class FoodSearchProblem:
     """
     A search problem associated with finding the a path that collects all of the
