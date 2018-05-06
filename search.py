@@ -97,10 +97,55 @@ def breadthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
 
+# Busca de Custo Uniforme
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    #Inicializa a fila de prioridade (em ordem crescente para o custo do Caminho) dos nós/estados
+    borda = util.PriorityQueue()
+    #Vetor dos nos percorridos
+    acoes = []
+    #NoInicial recebe o estado do nó inicial
+    #{{No, acao do agente(direcao), custo}, caminho percorrido, custoCaminho}
+    noInicial = ((problem.getStartState(), None, 0), [], 0)
+    #Inicializa a fila com o no do estado inicial
+    borda.push(noInicial, None)
+    #Enquanto a fila não for vazia
+    while not borda.isEmpty():
+        #Retira um elemento da fila
+		atual = borda.pop()
+		#Recebe o no do estado atual
+		noAtual = atual[0][0]
+		#Recebe a acao atual efetuada
+		direcaoAtual = atual[0][1]
+		#Recebe vetor de acoes efetuadas (caminho percorrido)
+		caminhoAtual = atual[1]
+		#Recebe o custo do caminho até o momento
+		custoAtual = atual[2]
+		#Verifica se o no não foi acessado
+		if noAtual not in acoes:
+			#Adiciona o no nao visitado no vetor acoes
+			acoes.append(noAtual)
+			#Verifica se o estado atual é o estado meta
+			#Se sim, retorna o caminho percorrido
+			if(problem.isGoalState(noAtual)):
+				return caminhoAtual
+			#Recebe os estados(nos) sucessores do estado atual
+			noSucessores = problem.getSuccessors(noAtual)
+			#Insere os estados(nos) sucessores em uma lista para armazenar tal informacao
+			listaSucc = list(noSucessores)
+			#Laço que percorre a lista de estados(nos) sucessores
+			for no in listaSucc:
+				#Verifica se o no(estado) esta no vetor de acoes
+				if no[0] not in acoes:
+					#Verifica se o no(estado) eh o estado meta/ no objetivo
+					#Se sim, retorna o caminho percorrido ate o no objetivo
+					if(problem.isGoalState(no[0])):
+						return caminhoAtual+[no[1]]
+					#Adiciona o no na fila de prioridade, caso este nao seja o no objetivo e nao foi visitado
+					novoNo = (no, caminhoAtual+[no[1]], custoAtual + no[2])
+					borda.push(novoNo, custoAtual + no[2])
+    return []
 
 def nullHeuristic(state, problem=None):
     """
