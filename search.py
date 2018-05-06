@@ -155,9 +155,83 @@ def nullHeuristic(state, problem=None):
     return 0
 
 def aStarSearch(problem, heuristic=nullHeuristic):
-    """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    """Search the node that has the lowest combined cost and heuristic first """
+    start = problem.getStartState()
+    goal = problem.getGoalState()
+
+    """ Conjunto de nós já avaliados """
+    closedSet = []
+
+    """ Conjunto de nós descobertos que ainda não foram avaliados.
+    Inicialmente, apenas o nó inicial é conhecido """
+    openSet = [start]
+
+    """ Para cada nó, aquele nó que pode ser alcançado de forma mais eficiente.
+    Se um nó pode ser alcançado de vários nós, cameFrom vai eventualmente conter
+    o passo anterior mais eficiente """
+    cameFrom = {}
+
+    """ Para cada nó, o custo de pegar do nó inicial até aquele nó """
+    gScore = {}
+
+    """ O custo do início para o início é zero """
+    gScore[start] = 0
+
+    """ Para cada nó, o custo total de pegar do nó inicial para o final pela
+    passagem por aquele nó. O valor é parcialmente conhecida, parcialmente heurística """
+    fScore = {}
+
+    """ Para o primeiro nó, o valor é completamente heurístico """
+    from searchAgents import manhattanHeuristic
+    fScore[start] = manhattanHeuristic(start, problem)
+
+    while openSet:
+        lowest = manhattanHeuristic(openSet[0], problem)
+        for i in openSet:
+            if lowest > manhattanHeuristic(i, problem):
+                lowest = manhattanHeuristic(i, problem)
+        current = lowest
+
+        if current == goal:
+            return reconstruct_path(cameFrom, current)
+
+        openSet.remove(current)
+        closedSet.append(current)
+
+        print(current)
+        neighbor = problem.getSuccessors(current)
+
+        for i in neighbor:
+            if gScore.get(i[0]) == None:
+                gScore[i[0]] = float("inf")
+
+            if i in closedSet:
+                continue
+                """ Ignora o vizinho que já foi avaliado """
+
+            if i not in openSet:
+                openSet.append(i)
+                """ Descobre um novo nó """
+            print(i)
+            """ A distância do início até o vizinho """
+            tentative_gScore = gScore[current] + abs(manhattanHeuristic(current, problem) - manhattanHeuristic(i[0], problem))
+            if tentative_gScore >= gScore[i[0]]:
+                continue
+                """ Este não é o melhor caminho """
+
+            """ Este caminho é o melhor até agora. Grave! """
+            cameFrom[i[0]] = current
+            gScore[i[0]] = tentative_gScore
+            fScore[i[0]] = gScore[i[0]] + manhattanHeuristic(i[0], problem)
+
+    return failure
+
+def reconstruct_path(cameFrom, current):
+    total_path = [current]
+    while current in cameFrom.keys():
+        current = cameFrom[current]
+        total_path.append(current)
+    return total_path
 
 # Subida de encosta
 def hillClimbing(problem):
@@ -191,6 +265,60 @@ def hillClimbing(problem):
         # Adiciona aos caminhos
         caminho.append(vizinho[1])
         atual = vizinho[0]
+
+# Têmpera Simulada
+def simmulatedAnnealing(problem):
+    """
+    #Temperatura com valor elevado
+    T = 1000
+    #Solução candidata inicial qualquer
+    S = problem.getStartState()
+    #Vetor de acoes
+    acoes = []
+    #Melhor recebe S
+    Melhor = S
+
+    #Repita até Melhor = solucaoIdeal OU T < 0
+    while
+        #R <- gerarVizinho(S)
+        #Qualidade(R) > Qualidade(S) OU Aleatorio() < P(R,S,T)
+        #P(R.S.T) = EXP(Qualidade(R)-Qualidade(S))/T
+            #S <- #R
+        #T <- novaTemperatura(T)
+        #Se Qualidade(S) > Qualidade(Melhor)
+            #Melhor <- S
+    #Return Melhor
+    #Retornar vetor de acoes(caminho percorrido)
+
+    #-------------------------------------------------------------------------
+
+    #S = S0
+    #T0 = TempInicial()
+    #T = T0
+    #j = 1
+    #/*Loop principal – Verifica se foram atendidas as condições de termino do algoritmo*/
+    #Repita
+    #    i = 1
+    #    nSucesso = 0
+    #    /*Loop Interno – Realização de perturbação em uma iteração*/
+    #    Repita
+    #        Si = Perturba(S)
+    #        ∆Fi = f(Si) – f(S)
+    #        /*Teste de aceitação de uma nova solução*/
+    #        Se (∆fi ≤ 0) ou (exp(-∆fi/T) > Randomiza()) então
+    #        S= Si
+    #        nSucesso = nSucesso + 1
+    #        Fim-se
+    #        i = i + 1
+    #    Até (nSucesso ≥ L) ou (i > P)
+    #    /*Actualização da Temperatura*/
+    #    T = α.T
+    #    /*Actualização do Contador de iterações*/
+    #    j = j + 1
+    #Até (nSucesso = 0) ou (j > M)
+    #/*Saída do Algoritmo*/
+    Imprima(S)"""
+
 
 # Distância entre
 def distancia2pts(pos1, pos2):
