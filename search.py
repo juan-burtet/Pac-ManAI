@@ -20,7 +20,6 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
-import math
 
 class SearchProblem:
     """
@@ -63,7 +62,6 @@ class SearchProblem:
         The sequence must be composed of legal moves.
         """
         util.raiseNotDefined()
-
 
 def tinyMazeSearch(problem):
     """
@@ -127,7 +125,7 @@ def uniformCostSearch(problem):
 			#Adiciona o no nao visitado no vetor acoes
 			acoes.append(noAtual)
 			#Verifica se o estado atual é o estado meta
-			#Se sim, retorna o caminho percorrido
+			#Se sim, retorna o caminho percorrido9
 			if(problem.isGoalState(noAtual)):
 				return caminhoAtual
 			#Recebe os estados(nos) sucessores do estado atual
@@ -154,87 +152,48 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+# A*
 def aStarSearch(problem, heuristic=nullHeuristic):
-    """Search the node that has the lowest combined cost and heuristic first """
-    start = problem.getStartState()
-    goal = problem.getGoalState()
 
-    """ Conjunto de nós já avaliados """
-    closedSet = []
+    # Inicializa a fila Prioritária
+    fila = util.PriorityQueue()
+    # Set com nós expandidos
+    expandidos = set()
+    # Nó inicial na fila, adicionado uma dupla
+    # A primeira, é uma tripla (Nó, Rota, custo)
+    # Segunda é o custo
+    fila.push((problem.getStartState(), [], 0),0)
 
-    """ Conjunto de nós descobertos que ainda não foram avaliados.
-    Inicialmente, apenas o nó inicial é conhecido """
-    openSet = [start]
+    # Enquanto a fila não for vazia
+    while not fila.isEmpty():
+        # Pop da fila pegando o nó atual, os movimentos até o nó e o custo até o nó
+        nodoAtual, movimentos, custoAtual = fila.pop()
+        # Se o nó atual já foi expandido, continua pro próximo
+        if(nodoAtual in expandidos):
+            continue
+        # Se o nó atual é o nó objetivo, retorna os movimentos
+        if problem.isGoalState(nodoAtual):
+            return movimentos
+        # Nó atual é adicionado aos expandidos
+        expandidos.add(nodoAtual)
 
-    """ Para cada nó, aquele nó que pode ser alcançado de forma mais eficiente.
-    Se um nó pode ser alcançado de vários nós, cameFrom vai eventualmente conter
-    o passo anterior mais eficiente """
-    cameFrom = {}
-
-    """ Para cada nó, o custo de pegar do nó inicial até aquele nó """
-    gScore = {}
-
-    """ O custo do início para o início é zero """
-    gScore[start] = 0
-
-    """ Para cada nó, o custo total de pegar do nó inicial para o final pela
-    passagem por aquele nó. O valor é parcialmente conhecida, parcialmente heurística """
-    fScore = {}
-
-    """ Para o primeiro nó, o valor é completamente heurístico """
-    from searchAgents import manhattanHeuristic
-    fScore[start] = manhattanHeuristic(start, problem)
-
-    while openSet:
-        lowest = manhattanHeuristic(openSet[0], problem)
-        for i in openSet:
-            if lowest > manhattanHeuristic(i, problem):
-                lowest = manhattanHeuristic(i, problem)
-        current = lowest
-
-        if current == goal:
-            return reconstruct_path(cameFrom, current)
-
-        openSet.remove(current)
-        closedSet.append(current)
-
-        print(current)
-        neighbor = problem.getSuccessors(current)
-
-        for i in neighbor:
-            if gScore.get(i[0]) == None:
-                gScore[i[0]] = float("inf")
-
-            if i in closedSet:
+        # Percorre por todos os sucessores do Nó atual
+        for nodo, movimento, custo  in problem.getSuccessors(nodoAtual):
+            # Se o nodo já foi expandido, segue pro próximo sucessor
+            if(nodo in expandidos):
                 continue
-                """ Ignora o vizinho que já foi avaliado """
+            # Valor da heuristica
+            h = heuristic(nodo, problem)
+            # Adiciona aos nodos aberto a dupla:
+            # Primeira posição (Nó aberto, movimentos até o nó, e o custo dele + custo somado)
+            # Segunda posição (custo dele + custo somado + heuristica)
+            fila.push((nodo, movimentos + [movimento], custoAtual + custo), custoAtual + custo + h)
 
-            if i not in openSet:
-                openSet.append(i)
-                """ Descobre um novo nó """
-            print(i)
-            """ A distância do início até o vizinho """
-            tentative_gScore = gScore[current] + abs(manhattanHeuristic(current, problem) - manhattanHeuristic(i[0], problem))
-            if tentative_gScore >= gScore[i[0]]:
-                continue
-                """ Este não é o melhor caminho """
-
-            """ Este caminho é o melhor até agora. Grave! """
-            cameFrom[i[0]] = current
-            gScore[i[0]] = tentative_gScore
-            fScore[i[0]] = gScore[i[0]] + manhattanHeuristic(i[0], problem)
-
-    return failure
-
-def reconstruct_path(cameFrom, current):
-    total_path = [current]
-    while current in cameFrom.keys():
-        current = cameFrom[current]
-        total_path.append(current)
-    return total_path
+    # Se não encontrou um caminho, retorna vazio
+    return []
 
 # Subida de encosta
-def hillClimbing(problem):
+def hillClimbing(problem, heuristic=nullHeuristic):
 
     # recebe o Estado inicial
     atual = problem.getStartState()
@@ -255,11 +214,11 @@ def hillClimbing(problem):
         # Passa por todos os sucessores
         for x in listaSucessores:
             # Fica com a menor distância entre um sucessor e o objetivo
-            if distancia2pts(vizinho[0], problem.getGoalState()) > distancia2pts(x[0], problem.getGoalState()):
+            if heuristic(vizinho[0], problem) > heuristic(x[0], problem):
                 vizinho = x
 
         # Se a distância for maior ou igual ao atual, retorna os caminhos
-        if distancia2pts(atual, problem.getGoalState()) <= distancia2pts(vizinho[0], problem.getGoalState()):
+        if heuristic(atual, problem) <= heuristic(vizinho[0], problem):
             return caminho
 
         # Adiciona aos caminhos
@@ -283,67 +242,7 @@ def simmulatedAnnealing(problem):
             if (DELTA)E > 0 then current <- next
             else current <- next only with probability e^(DELTA)E/T
     """
-
-    """
-    Temperatura com valor elevado
-    T = 1000
-    Solução candidata inicial qualquer
-    S = problem.getStartState()
-    Vetor de acoes
-    acoes = []
-    Melhor recebe S
-    Melhor = S
-
-    Repita até Melhor = solucaoIdeal OU T < 0
-    while
-        R <- gerarVizinho(S)
-        Qualidade(R) > Qualidade(S) OU Aleatorio() < P(R,S,T)
-        P(R.S.T) = EXP(Qualidade(R)-Qualidade(S))/T
-            S <- #R
-        T <- novaTemperatura(T)
-        Se Qualidade(S) > Qualidade(Melhor)
-            Melhor <- S
-    Return Melhor
-    Retornar vetor de acoes(caminho percorrido)
-
-    -------------------------------------------------------------------------
-
-    S = S0
-    T0 = TempInicial()
-    T = T0
-    j = 1
-    /*Loop principal – Verifica se foram atendidas as condições de termino do algoritmo*/
-    Repita
-        i = 1
-        nSucesso = 0
-        /*Loop Interno – Realização de perturbação em uma iteração*/
-        Repita
-            Si = Perturba(S)
-            ∆Fi = f(Si) – f(S)
-            /*Teste de aceitação de uma nova solução*/
-            Se (∆fi ≤ 0) ou (exp(-∆fi/T) > Randomiza()) então
-            S= Si
-            nSucesso = nSucesso + 1
-            Fim-se
-            i = i + 1
-        Até (nSucesso ≥ L) ou (i > P)
-        /*Actualização da Temperatura*/
-        T = α.T
-        /*Actualização do Contador de iterações*/
-        j = j + 1
-    Até (nSucesso = 0) ou (j > M)
-    /*Saída do Algoritmo*/
-    Imprima(S)
-    """
-
-# Distância entre 2 pontos
-def distancia2pts(pos1, pos2):
-    xy1 = pos1
-    xy2 = pos2
-
-    x = xy1[0] + xy2[0]
-    y = xy1[1] + xy2[1]
-    return abs(math.sqrt(x*x + y*y))
+    #---------------------------------------------------------------------------
 
 # Abbreviations
 bfs = breadthFirstSearch
