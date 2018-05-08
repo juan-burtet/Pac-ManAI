@@ -206,7 +206,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             # Adiciona aos nodos aberto a dupla:
             # Primeira posição (Nó aberto, movimentos até o nó, e o custo dele + custo somado)
             # Segunda posição (custo dele + custo somado + heuristica)
-            fila.push((nodo, movimentos + [x[1]], custoAtual + x[2]), custoAtual + x[2] + heuristic(x[0], problem))
+            fila.push((x[0], movimentos + [x[1]], custoAtual + x[2]), custoAtual + x[2] + heuristic(x[0], problem))
 
     # Se não encontrou um caminho, retorna vazio
     return []
