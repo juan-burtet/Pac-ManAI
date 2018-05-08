@@ -160,35 +160,53 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     fila = util.PriorityQueue()
     # Set com nós expandidos
     expandidos = set()
+    # Nodo inicial
+    nodoInicial = problem.getStartState()
+    # Rota até o objetivo
+    caminho = []
+    # Custo do Nó inicial
+    custoInicial = 0
     # Nó inicial na fila, adicionado uma dupla
     # A primeira, é uma tripla (Nó, Rota, custo)
     # Segunda é o custo
-    fila.push((problem.getStartState(), [], 0),0)
+    fila.push(nodoInicial, caminho, custoInicial),0)
 
     # Enquanto a fila não for vazia
     while not fila.isEmpty():
-        # Pop da fila pegando o nó atual, os movimentos até o nó e o custo até o nó
-        nodoAtual, movimentos, custoAtual = fila.pop()
-        # Se o nó atual já foi expandido, continua pro próximo
-        if(nodoAtual in expandidos):
-            continue
+        # Pop da fila
+        popFila = fila.pop()
+        # Nó atual
+        nodoAtual = popFila[0]
+        # Movimentos até o nó
+        movimentos = popFila[1]
+        # Custo até o nó
+        custoAtual = popFila[2]
+
         # Se o nó atual é o nó objetivo, retorna os movimentos
         if problem.isGoalState(nodoAtual):
             return movimentos
+
+        # Se o nó atual já foi expandido, continua pro próximo
+        if nodoAtual in expandidos:
+            continue
+
         # Nó atual é adicionado aos expandidos
         expandidos.add(nodoAtual)
 
+        # Sucessores do nó atual
+        sucessores = problem.getSuccessors(nodoAtual)
+        listaSucessores = list(sucessores)
+
         # Percorre por todos os sucessores do Nó atual
-        for nodo, movimento, custo  in problem.getSuccessors(nodoAtual):
+        for x in listaSucessores:
             # Se o nodo já foi expandido, segue pro próximo sucessor
-            if(nodo in expandidos):
+            if x[0] in expandidos:
                 continue
-            # Valor da heuristica
-            h = heuristic(nodo, problem)
+
             # Adiciona aos nodos aberto a dupla:
             # Primeira posição (Nó aberto, movimentos até o nó, e o custo dele + custo somado)
             # Segunda posição (custo dele + custo somado + heuristica)
-            fila.push((nodo, movimentos + [movimento], custoAtual + custo), custoAtual + custo + h)
+            fila.push((nodo, movimentos + [x[1]], custoAtual + x[2]), custoAtual + x[2] + heuristic(x[0], problem))
 
     # Se não encontrou um caminho, retorna vazio
     return []
@@ -229,31 +247,46 @@ def simmulatedAnnealing(problem, heuristic=nullHeuristic):
     fila = util.PriorityQueue()
     # Nós visitados
     expandidos = set()
+    # Nó Inicial
+    inicial = problem.getStartState()
+    # Caminho do Inicio até esse nó
+    caminho = []
+    # Custo do primeiro nó
+    custoInicial = 0
     # Nó inicial da fila
-    fila.push((problem.getStartState(), [], 0), heuristic(problem.getStartState(), problem))
+    fila.push((inicial, caminho, custoInicial), heuristic(inicial, problem))
 
-    # Loop Infinito
+    # Loop até acabar a fila (ver todos os nós)
     while not fila.isEmpty():
         # Retira da Fila o que tiver a menor distância euclidiana entre o nó atual e objetivo
-        nodoAtual, movimentos, custoAtual = fila.pop()
-        # Se o nó retirado já foi aberto, retira o próximo da fila
-        if nodoAtual in expandidos:
-            continue
+        x = fila.pop()
+
+        nodoAtual = x[0]
+        movimentos = x[1]
+        custoAtual = x[2]
+
         # Se o nó retirado é o objetivo, retorna os movimentos até ele
         if problem.isGoalState(nodoAtual):
             return movimentos
+
+        # Se o nó retirado já foi aberto, retira o próximo da fila
+        if nodoAtual in expandidos:
+            continue
+
         # Adiciona aos nós já visitados
         expandidos.add(nodoAtual)
 
+        # Sucessores do nó atual
+        sucessores = problem.getSuccessors(nodoAtual)
+        listaSucessores = list(sucessores)
+
         # Percorre pelos vizinhos do nó
-        for nodo, movimento, custo in problem.getSuccessors(nodoAtual):
+        for x in listaSucessores:
             # Se o vizinho já foi visitado, parte pro próximo
-            if nodo in expandidos:
+            if x[0] in expandidos:
                 continue
-            # Calcula a heuristica do nó
-            h = heuristic(nodo, problem)
             # Adiciona o nó na Fila prioritária, passando apenas a heuristica
-            fila.push((nodo,movimentos + [movimento], custoAtual + custo), h)
+            fila.push((x[0],movimentos + [x[1]], custoAtual + x[2]), heuristic(x[0], problem))
     # Não foi encontrado o objetivo, retorna o "melhor caminho"
     return movimentos
 
