@@ -169,7 +169,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     # Nó inicial na fila, adicionado uma dupla
     # A primeira, é uma tripla (Nó, Rota, custo)
     # Segunda é o custo
-    fila.push(nodoInicial, caminho, custoInicial),0)
+    fila.push((nodoInicial, caminho, custoInicial),0)
 
     # Enquanto a fila não for vazia
     while not fila.isEmpty():
